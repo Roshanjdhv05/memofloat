@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-cream font-sans text-espresso antialiased;
+    overflow-x: hidden;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+  }
+  section[id] {
+    scroll-margin-top: 6.5rem;
+  }
+  :focus-visible {
+    outline: 3px solid #30271f;
+    outline-offset: 3px;
+    border-radius: 12px;
+  }
+  ::selection {
+    background: #ffe66d;
+  }
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-delay: var(--d, 0ms);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* "Tuck under the edge" loop used in How It Works */
+@keyframes tuck {
+  0%,
+  30% {
+    transform: translateX(0);
+  }
+  55%,
+  85% {
+    transform: translateX(120%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+.animate-tuck {
+  animation: tuck 5s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes caret {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+.animate-caret {
+  animation: caret 1s steps(1) infinite;
+}
+
+.edge-tab {
+  transition:
+    left 0.75s cubic-bezier(0.34, 1.25, 0.4, 1),
+    top 0.75s cubic-bezier(0.34, 1.25, 0.4, 1),
+    transform 0.75s cubic-bezier(0.34, 1.25, 0.4, 1),
+    box-shadow 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
