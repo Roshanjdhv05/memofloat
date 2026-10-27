@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { DOWNLOAD_FILE_NAME, DOWNLOAD_URL } from '../config'
+import { supabase } from '../lib/supabase'
 
 interface DownloadContextType {
   downloadCount: number
@@ -21,18 +22,53 @@ export function DownloadProvider({ children }: { children: ReactNode }) {
   const [hasDownloaded, setHasDownloaded] = useState(false)
 
   useEffect(() => {
+    // 1. Initial quick load from localStorage
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
         const parsed = parseInt(stored, 10)
         if (!isNaN(parsed) && parsed >= DEFAULT_COUNT) {
           setDownloadCount(parsed)
-          return
         }
+      } else {
+        localStorage.setItem(STORAGE_KEY, String(DEFAULT_COUNT))
       }
-      localStorage.setItem(STORAGE_KEY, String(DEFAULT_COUNT))
     } catch {
       // Ignore localStorage errors (e.g., privacy mode)
+    }
+
+    // 2. Fetch live count from Supabase if configured
+    if (!supabase) return
+
+    let isMounted = true
+
+    async function fetchServerCount() {
+      try {
+        const { data, error } = await supabase!
+          .from('app_stats')
+          .select('value')
+          .eq('id', 'downloads')
+          .single()
+
+        if (!error && data && typeof data.value === 'number') {
+          if (isMounted) {
+            setDownloadCount(data.value)
+            try {
+              localStorage.setItem(STORAGE_KEY, String(data.value))
+            } catch {
+              // Ignore localStorage errors
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Could not fetch download count from Supabase:', err)
+      }
+    }
+
+    fetchServerCount()
+
+    return () => {
+      isMounted = false
     }
   }, [])
 
@@ -46,6 +82,7 @@ export function DownloadProvider({ children }: { children: ReactNode }) {
   }
 
   const triggerDownload = () => {
+    // Optimistic local update
     setDownloadCount((prev) => {
       const next = prev + 1
       try {
@@ -64,6 +101,27 @@ export function DownloadProvider({ children }: { children: ReactNode }) {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+
+    // Sync count increment to Supabase atomically
+    if (supabase) {
+      void (async () => {
+        try {
+          const { data, error } = await supabase.rpc('increment_download_count')
+          if (!error && typeof data === 'number') {
+            setDownloadCount(data)
+            try {
+              localStorage.setItem(STORAGE_KEY, String(data))
+            } catch {
+              // Ignore
+            }
+          } else if (error) {
+            console.warn('Error incrementing download count in Supabase:', error)
+          }
+        } catch (err) {
+          console.warn('Failed to call increment_download_count:', err)
+        }
+      })()
+    }
   }
 
   return (
