@@ -1,11 +1,8 @@
 /**
  * Central place for links and asset helpers.
- *
- * DOWNLOAD_URL / SUPPORT_URL are placeholders: no real destinations were
- * provided, so they point at "#". Replace them with your real download page,
- * support email (e.g. "mailto:support@yourdomain.com") and legal pages.
  */
-export const DOWNLOAD_URL = '#'
+export const DOWNLOAD_FILE_NAME = 'MemoFloat-Setup-1.0.0-x64.exe'
+export const DOWNLOAD_URL = `${import.meta.env.BASE_URL}product/${DOWNLOAD_FILE_NAME}`
 export const SUPPORT_URL = '#'
 export const PRIVACY_URL = '#'
 export const TERMS_URL = '#'

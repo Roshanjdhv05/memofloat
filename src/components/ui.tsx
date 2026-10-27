@@ -38,17 +38,34 @@ export function Button({
   className = '',
   onClick,
 }: {
-  href: string
+  href?: string
   children: ReactNode
   variant?: keyof typeof BUTTONS
   className?: string
   onClick?: () => void
 }) {
+  const commonClasses = `inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-extrabold transition duration-300 hover:scale-[1.04] active:scale-95 sm:text-base ${BUTTONS[variant]} ${className}`
+
+  if (onClick && !href) {
+    return (
+      <button type="button" onClick={onClick} className={commonClasses}>
+        {children}
+      </button>
+    )
+  }
+
   return (
     <a
-      href={href}
-      onClick={onClick}
-      className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-extrabold transition duration-300 hover:scale-[1.04] active:scale-95 sm:text-base ${BUTTONS[variant]} ${className}`}
+      href={href || '#'}
+      onClick={(e) => {
+        if (onClick) {
+          if (!href || href === '#') {
+            e.preventDefault()
+          }
+          onClick()
+        }
+      }}
+      className={commonClasses}
     >
       {children}
     </a>
@@ -91,11 +108,11 @@ export function MiniNote({
 }) {
   return (
     <div
-      className={`${NOTE_BG[color]} rounded-2xl border border-white/60 p-3 shadow-soft ${className}`}
+      className={`${NOTE_BG[color]} rounded-xl sm:rounded-2xl border border-white/60 p-2 sm:p-3 shadow-soft ${className}`}
       style={style}
     >
-      <p className="font-display text-sm font-semibold leading-tight">{title}</p>
-      {children && <p className="mt-1 text-xs leading-snug text-espresso/70">{children}</p>}
+      <p className="font-display text-xs sm:text-sm font-semibold leading-tight truncate sm:whitespace-normal">{title}</p>
+      {children && <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs leading-snug text-espresso/70">{children}</p>}
     </div>
   )
 }

@@ -1,9 +1,12 @@
 import type { CSSProperties } from 'react'
-import { CTA_ID, DOWNLOAD_URL, asset } from '../config'
+import { CTA_ID, asset } from '../config'
+import { useDownload } from '../context/DownloadContext'
 import { Reveal } from './Reveal'
 import { Button, Container } from './ui'
 
 export function FinalCta() {
+  const { openModal } = useDownload()
+
   return (
     <section id={CTA_ID} className="py-20 sm:py-24">
       <Container>
@@ -32,7 +35,7 @@ export function FinalCta() {
               Colorful notes on your desktop, tucked away whenever you need the space.
             </p>
             <div className="relative mt-8 flex justify-center">
-              <Button href={DOWNLOAD_URL}>Get MemoFloat</Button>
+              <Button onClick={openModal}>Get MemoFloat</Button>
             </div>
           </div>
         </Reveal>
